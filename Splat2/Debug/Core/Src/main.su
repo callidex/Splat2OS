@@ -1,0 +1,12 @@
+main.c:101:5:main	8	static
+main.c:189:6:SystemClock_Config	232	static
+main.c:253:13:MX_ETH_Init	8	static
+main.c:297:13:MX_USART2_UART_Init	8	static
+main.c:332:13:MX_USART3_UART_Init	8	static
+main.c:367:13:MX_USART6_UART_Init	8	static
+main.c:402:13:MX_GPIO_Init	56	static
+main.c:459:6:StartDefaultTask	16	static
+main.c:479:6:StartDisplayControllerTask	16	static
+main.c:499:6:StartProgrammerTask	24	static
+main.c:528:6:HAL_TIM_PeriodElapsedCallback	16	static
+main.c:545:6:Error_Handler	4	static,ignoring_inline_asm
