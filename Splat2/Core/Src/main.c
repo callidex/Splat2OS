@@ -408,6 +408,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOG_CLK_ENABLE();
 
@@ -415,7 +416,13 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOB, LD1_Pin|LD3_Pin|LD2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(PG15_GPI09_ON_ESP_GPIO_Port, PG15_GPI09_ON_ESP_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(USB_PowerSwitchOn_GPIO_Port, USB_PowerSwitchOn_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(PG15_EN_ON_ESP_GPIO_Port, PG15_EN_ON_ESP_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin : USER_Btn_Pin */
   GPIO_InitStruct.Pin = USER_Btn_Pin;
@@ -430,12 +437,19 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : USB_PowerSwitchOn_Pin */
-  GPIO_InitStruct.Pin = USB_PowerSwitchOn_Pin;
+  /*Configure GPIO pin : PG15_GPI09_ON_ESP_Pin */
+  GPIO_InitStruct.Pin = PG15_GPI09_ON_ESP_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(PG15_GPI09_ON_ESP_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : USB_PowerSwitchOn_Pin PG15_EN_ON_ESP_Pin */
+  GPIO_InitStruct.Pin = USB_PowerSwitchOn_Pin|PG15_EN_ON_ESP_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(USB_PowerSwitchOn_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
   /*Configure GPIO pin : USB_OverCurrent_Pin */
   GPIO_InitStruct.Pin = USB_OverCurrent_Pin;
@@ -482,8 +496,17 @@ void StartDisplayControllerTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
-    osDelay(1000);
+
+    osDelay(5000);
+    //HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
+    //HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
+    //osDelay(1000);
+    //HAL_GPIO_TogglePin(GPIOE, EN_for_ESP_Pin);
+//    HAL_GPIO_TogglePin(RTS_FOR_ESP_GPIO_Port, RTS_FOR_ESP_Pin);
+  //  HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
+ //   HAL_GPIO_TogglePin(GPIOE, EN_for_ESP_GPIO_Port);
+   // HAL_GPIO_TogglePin(GPIOE, EN_for_ESP_GPIO_Port);
+
   }
   osThreadTerminate(NULL);
   /* USER CODE END StartDisplayControllerTask */
@@ -499,22 +522,8 @@ void StartDisplayControllerTask(void *argument)
 void StartProgrammerTask(void *argument)
 {
   /* USER CODE BEGIN StartProgrammerTask */
- // priority task
-
-	/* Infinite loop */
-  for(;;)
-  {
-
-   HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
-
-    for(int i=0;i<1000000; i++)
-    {
-    	printf(i);
-    }
-osDelay(1000);
-  }
+	StartProgrammer(argument);
   /* USER CODE END StartProgrammerTask */
-  osThreadTerminate(NULL);
 }
 
  /**
