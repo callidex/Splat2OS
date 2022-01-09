@@ -111,13 +111,12 @@ cbuf_handle_t cbufSTMToESP;
   */
 int main(void)
 {
+  /* USER CODE BEGIN 1 */
 	ESPToSTMbuffer = malloc(1500 * sizeof(uint8_t));
 	cbufESPToSTM = circular_buf_init(ESPToSTMbuffer,1500);
 
 	STMToESPbuffer = malloc(1500 * sizeof(uint8_t));
 	cbufSTMToESP = circular_buf_init(STMToESPbuffer,1500);
-
-  /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
 
@@ -506,7 +505,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	{
 		// just keep loading up the buffer
 		assert(circular_buf_try_put(cbufSTMToESP, (uint8_t) incomingfromSTM[0])==0);
-		HAL_UART_Receive_IT(&huart3, incomingfromESP, 1);
+		HAL_UART_Receive_IT(&huart3, incomingfromSTM, 1);
 	}
 }
 
@@ -560,7 +559,6 @@ void StartDisplayControllerTask(void *argument)
 * @retval None
 */
 /* USER CODE END Header_StartProgrammerTask */
-
 void StartProgrammerTask(void *argument)
 {
   /* USER CODE BEGIN StartProgrammerTask */
