@@ -38,16 +38,22 @@ void StartProgrammer(void *argument)
 	BootToProgram();
 	osDelay(100);
 	uint8_t ready[] = "Ready to receive\r\n";
+	circular_buf_empty(cbufESPToSTM);
 	HAL_UART_Transmit(&huart3,ready,sizeof(ready),10);
 	for(;;)
 	{
+		uint8_t resetFlagString[10];
+		circular_buf_peek(cbufESPToSTM, resetFlagString, 10);
+		//TODO: Is this even close?
+
 		uint8_t dataFromESP;
 		uint8_t dataFromSTM;
 		if(circular_buf_get(cbufESPToSTM, &dataFromESP)==0)
 		{
 			HAL_UART_Transmit(&huart3,&dataFromESP,sizeof(dataFromESP),300);
 		}
-s
+
+
 		if(circular_buf_get(cbufSTMToESP, &dataFromSTM)==0)
 		{
 			HAL_UART_Transmit(&huart6,&dataFromSTM,sizeof(dataFromSTM),300);

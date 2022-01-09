@@ -112,11 +112,11 @@ cbuf_handle_t cbufSTMToESP;
 int main(void)
 {
 	/* USER CODE BEGIN 1 */
-	ESPToSTMbuffer = malloc(1500 * sizeof(uint8_t));
-	cbufESPToSTM = circular_buf_init(ESPToSTMbuffer,1500);
+	ESPToSTMbuffer = malloc(3500 * sizeof(uint8_t));
+	cbufESPToSTM = circular_buf_init(ESPToSTMbuffer,3500);
 
-	STMToESPbuffer = malloc(1500 * sizeof(uint8_t));
-	cbufSTMToESP = circular_buf_init(STMToESPbuffer,1500);
+	STMToESPbuffer = malloc(3500 * sizeof(uint8_t));
+	cbufSTMToESP = circular_buf_init(STMToESPbuffer,3500);
 
 	/* USER CODE END 1 */
 
