@@ -26,19 +26,19 @@ void StartProgrammer(void *argument)
 {
 
 	// Setup
-    HAL_UART_Receive_IT(&huart6, incomingfromESP, 1);
-    HAL_UART_Receive_IT(&huart3, incomingfromSTM, 1);
+	HAL_UART_Receive_IT(&huart6, incomingfromESP, 1);
+	HAL_UART_Receive_IT(&huart3, incomingfromSTM, 1);
 
-    // Let the user know its going ok so far
-    uint8_t Test[] = "Entering boot mode\r\n";
+	// Let the user know its going ok so far
+	uint8_t Test[] = "Entering boot mode\r\n";
 	HAL_UART_Transmit(&huart3,Test,sizeof(Test),10);
 
 
 
- 	BootToProgram();
- 	osDelay(100);
- 	uint8_t ready[] = "Ready to receive\r\n";
- 	HAL_UART_Transmit(&huart3,ready,sizeof(ready),10);
+	BootToProgram();
+	osDelay(100);
+	uint8_t ready[] = "Ready to receive\r\n";
+	HAL_UART_Transmit(&huart3,ready,sizeof(ready),10);
 	for(;;)
 	{
 		uint8_t dataFromESP;
@@ -47,11 +47,11 @@ void StartProgrammer(void *argument)
 		{
 			HAL_UART_Transmit(&huart3,&dataFromESP,sizeof(dataFromESP),300);
 		}
-
+s
 		if(circular_buf_get(cbufSTMToESP, &dataFromSTM)==0)
 		{
 			HAL_UART_Transmit(&huart6,&dataFromSTM,sizeof(dataFromSTM),300);
-// and echo back for testing
+			// and echo back for testing
 			HAL_UART_Transmit(&huart3,&dataFromSTM,sizeof(dataFromSTM),300);
 		}
 
