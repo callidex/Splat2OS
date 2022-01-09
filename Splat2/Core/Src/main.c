@@ -25,6 +25,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include "circbuff.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,6 +44,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 
+UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
 UART_HandleTypeDef huart6;
@@ -66,10 +68,10 @@ osThreadId_t programmerTaskHandle;
 const osThreadAttr_t programmerTask_attributes = {
   .name = "programmerTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityAboveNormal,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
-
+uint8_t Rx_data[1];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -78,16 +80,21 @@ static void MX_GPIO_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART6_UART_Init(void);
+static void MX_USART1_UART_Init(void);
 void StartDefaultTask(void *argument);
 void StartDisplayControllerTask(void *argument);
 void StartProgrammerTask(void *argument);
 
 /* USER CODE BEGIN PFP */
+uint8_t UART6_rxBuffer[100] = {0};
+uint8_t * buffer;
+cbuf_handle_t cbuf;
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
 
 /* USER CODE END 0 */
 
@@ -97,6 +104,9 @@ void StartProgrammerTask(void *argument);
   */
 int main(void)
 {
+	buffer = malloc(1500 * sizeof(uint8_t));
+	cbuf = circular_buf_init(buffer,1500);
+
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -122,6 +132,7 @@ int main(void)
   MX_USART3_UART_Init();
   MX_USART2_UART_Init();
   MX_USART6_UART_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -232,6 +243,41 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief USART1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART1_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART1_Init 0 */
+
+  /* USER CODE END USART1_Init 0 */
+
+  /* USER CODE BEGIN USART1_Init 1 */
+
+  /* USER CODE END USART1_Init 1 */
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 115200;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART1_Init 2 */
+
+  /* USER CODE END USART1_Init 2 */
+
+}
+
+/**
   * @brief USART2 Initialization Function
   * @param None
   * @retval None
@@ -331,7 +377,10 @@ static void MX_USART6_UART_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN USART6_Init 2 */
+  //HAL_NVIC_SetPriority(USART6_IRQn, 6, 0);
 
+
+    ///HAL_NVIC_EnableIRQ(USART6_IRQn);
   /* USER CODE END USART6_Init 2 */
 
 }
@@ -435,6 +484,18 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	if(huart== &huart6)
+	{
+		// just keep loading up the buffer
+		assert(circular_buf_try_put(cbuf, (uint8_t) Rx_data[0])==0);
+		HAL_UART_Receive_IT(&huart6, Rx_data, 1);
+	}
+
+
+}
+
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -493,10 +554,29 @@ void StartDisplayControllerTask(void *argument)
 * @retval None
 */
 /* USER CODE END Header_StartProgrammerTask */
+
 void StartProgrammerTask(void *argument)
 {
   /* USER CODE BEGIN StartProgrammerTask */
-	StartProgrammer(argument);
+
+	  HAL_UART_Receive_IT(&huart6, Rx_data, 1);
+		uint8_t Test[] = "Entering boot mode\r\n"; //Data to send
+		HAL_UART_Transmit(&huart3,Test,sizeof(Test),10);// Sending in normal mode
+		HAL_UART_Transmit(&huart6,Test,sizeof(Test),10);// Sending in normal mode
+
+	  StartProgrammer(argument);
+
+	uint8_t data;
+
+	for(;;){
+		if(circular_buf_get(cbuf, &data)==0)
+		{
+			HAL_UART_Transmit(&huart3,&data,sizeof(data),300);// Sending in normal mode
+		}
+//		circular_buf_put(cbuf, "Test Data - Buffer was empty");
+
+
+	}
   /* USER CODE END StartProgrammerTask */
 }
 
