@@ -71,7 +71,8 @@ const osThreadAttr_t programmerTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
-uint8_t Rx_data[1];
+uint8_t incomingfromSTM[1];
+uint8_t incomingfromESP[1];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -87,8 +88,14 @@ void StartProgrammerTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 uint8_t UART6_rxBuffer[100] = {0};
-uint8_t * buffer;
-cbuf_handle_t cbuf;
+
+
+uint8_t * ESPToSTMbuffer;
+cbuf_handle_t cbufESPToSTM;
+
+uint8_t * STMToESPbuffer;
+cbuf_handle_t cbufSTMToESP;
+
 
 /* USER CODE END PFP */
 
@@ -104,8 +111,11 @@ cbuf_handle_t cbuf;
   */
 int main(void)
 {
-	buffer = malloc(1500 * sizeof(uint8_t));
-	cbuf = circular_buf_init(buffer,1500);
+	ESPToSTMbuffer = malloc(1500 * sizeof(uint8_t));
+	cbufESPToSTM = circular_buf_init(ESPToSTMbuffer,1500);
+
+	STMToESPbuffer = malloc(1500 * sizeof(uint8_t));
+	cbufSTMToESP = circular_buf_init(STMToESPbuffer,1500);
 
   /* USER CODE BEGIN 1 */
 
@@ -489,11 +499,15 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	if(huart== &huart6)
 	{
 		// just keep loading up the buffer
-		assert(circular_buf_try_put(cbuf, (uint8_t) Rx_data[0])==0);
-		HAL_UART_Receive_IT(&huart6, Rx_data, 1);
+		assert(circular_buf_try_put(cbufESPToSTM, (uint8_t) incomingfromESP[0])==0);
+		HAL_UART_Receive_IT(&huart6, incomingfromESP, 1);
 	}
-
-
+	if(huart== &huart3)
+	{
+		// just keep loading up the buffer
+		assert(circular_buf_try_put(cbufSTMToESP, (uint8_t) incomingfromSTM[0])==0);
+		HAL_UART_Receive_IT(&huart3, incomingfromESP, 1);
+	}
 }
 
 /* USER CODE END 4 */
@@ -533,14 +547,6 @@ void StartDisplayControllerTask(void *argument)
   {
 
     osDelay(5000);
-    //HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
-    //HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
-    //osDelay(1000);
-    //HAL_GPIO_TogglePin(GPIOE, EN_for_ESP_Pin);
-//    HAL_GPIO_TogglePin(RTS_FOR_ESP_GPIO_Port, RTS_FOR_ESP_Pin);
-  //  HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
- //   HAL_GPIO_TogglePin(GPIOE, EN_for_ESP_GPIO_Port);
-   // HAL_GPIO_TogglePin(GPIOE, EN_for_ESP_GPIO_Port);
 
   }
   osThreadTerminate(NULL);
@@ -558,25 +564,7 @@ void StartDisplayControllerTask(void *argument)
 void StartProgrammerTask(void *argument)
 {
   /* USER CODE BEGIN StartProgrammerTask */
-
-	  HAL_UART_Receive_IT(&huart6, Rx_data, 1);
-		uint8_t Test[] = "Entering boot mode\r\n"; //Data to send
-		HAL_UART_Transmit(&huart3,Test,sizeof(Test),10);// Sending in normal mode
-		HAL_UART_Transmit(&huart6,Test,sizeof(Test),10);// Sending in normal mode
-
-	  StartProgrammer(argument);
-
-	uint8_t data;
-
-	for(;;){
-		if(circular_buf_get(cbuf, &data)==0)
-		{
-			HAL_UART_Transmit(&huart3,&data,sizeof(data),300);// Sending in normal mode
-		}
-//		circular_buf_put(cbuf, "Test Data - Buffer was empty");
-
-
-	}
+   StartProgrammer(argument);
   /* USER CODE END StartProgrammerTask */
 }
 

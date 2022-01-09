@@ -4,7 +4,6 @@ extern UART_HandleTypeDef ESP_UART(void);
 
 void BootToProgram()
 {
-	osDelay(5000);
 	HAL_GPIO_TogglePin(PG15_GPI09_ON_ESP_GPIO_Port, PG15_GPI09_ON_ESP_Pin);
 	osDelay(50);
 	HAL_GPIO_TogglePin(PE15_EN_ON_ESP_GPIO_Port, PE15_EN_ON_ESP_Pin);
@@ -25,11 +24,38 @@ void Reset()
 
 void StartProgrammer(void *argument)
 {
- 	// priority task
 
- 	osDelay(1000);
+	// Setup
+    HAL_UART_Receive_IT(&huart6, incomingfromESP, 1);
+    HAL_UART_Receive_IT(&huart3, incomingfromSTM, 1);
+
+    // Let the user know its going ok so far
+    uint8_t Test[] = "Entering boot mode\r\n"; //Data to send
+	HAL_UART_Transmit(&huart3,Test,sizeof(Test),10);// Sending in normal mode
+
+	uint8_t data;
+
  	BootToProgram();
  	osDelay(100);
- 	Reset();
+
+	for(;;)
+	{
+		if(circular_buf_get(cbufESPToSTM, &data)==0)
+		{
+			HAL_UART_Transmit(&huart3,&data,sizeof(data),300);
+		}
+		if(circular_buf_get(cbufSTMToESP, &data)==0)
+		{
+			HAL_UART_Transmit(&huart6,&data,sizeof(data),300);
+		}
+
+		//TODO: How do we know we're done?
+		bool readyToReset = false;
+		if( readyToReset )
+		{
+			Reset();
+			break;
+		}
+	}
 }
 

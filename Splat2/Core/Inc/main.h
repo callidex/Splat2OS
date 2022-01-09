@@ -33,11 +33,20 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "tasks/espprogrammer.h"
+#include "circbuff.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-
+UART_HandleTypeDef huart1;
+UART_HandleTypeDef huart2;
+extern  UART_HandleTypeDef huart3;
+extern  UART_HandleTypeDef huart6;
+extern  cbuf_handle_t cbufESPToSTM;
+extern  cbuf_handle_t cbufSTMToESP;
+// this separation of data from usage is why embedded is harder than it needs to be
+extern uint8_t incomingfromSTM[1];
+extern uint8_t incomingfromESP[1];
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
