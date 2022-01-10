@@ -33,8 +33,6 @@ void StartProgrammer(void *argument)
 	uint8_t Test[] = "Entering boot mode\r\n";
 	HAL_UART_Transmit(&huart3,Test,sizeof(Test),10);
 
-
-
 	BootToProgram();
 	osDelay(100);
 	uint8_t ready[] = "Ready to receive\r\n";
@@ -42,10 +40,6 @@ void StartProgrammer(void *argument)
 	HAL_UART_Transmit(&huart3,ready,sizeof(ready),10);
 	for(;;)
 	{
-		uint8_t resetFlagString[10];
-		circular_buf_peek(cbufESPToSTM, resetFlagString, 10);
-		//TODO: Is this even close?
-
 		uint8_t dataFromESP;
 		uint8_t dataFromSTM;
 		if(circular_buf_get(cbufESPToSTM, &dataFromESP)==0)
