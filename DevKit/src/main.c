@@ -12,5 +12,5 @@
 
 void app_main()
 {
-    ESP_LOGI("", "THere we go");
+    ESP_LOGI("", "Custom app text");
 }
