@@ -83,7 +83,9 @@ uint32_t SLIP_recv(void *pkt, uint32_t max_len) {
 
   int16_t r;
   do {
-	r = SLIP_recv_byte(stub_rx_one_char(), &state);
+	  uint8_t ch;
+	  HAL_UART_Receive(&huart6, ch,1,300);
+	r = SLIP_recv_byte(ch, &state);
 	if(r >= 0 && len < max_len) {
 	  p[len++] = (uint8_t)r;
 	}
