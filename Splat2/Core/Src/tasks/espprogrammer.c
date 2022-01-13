@@ -33,6 +33,25 @@ void SendSync()
 
 void StartProgrammer(void *argument)
 {
+	uint8_t Test[] = "Spinning up uart relay\r\n";
+	HAL_UART_Transmit(&huart3,Test,sizeof(Test),10);
+	for(;;)
+	{
+		uint8_t dataFromESP;
+		if(circular_buf_get(cbufESPToSTM, &dataFromESP)==0)
+		{
+			HAL_UART_Transmit(&huart3,&dataFromESP,sizeof(dataFromESP),300);
+		}
+		uint8_t dataFromSTM;
+		if(circular_buf_get(cbufSTMToESP, &dataFromSTM)==0)
+		{
+			HAL_UART_Transmit(&huart6,&dataFromSTM,sizeof(dataFromSTM),300);
+		}
+	}
+}
+/*
+void StartProgrammer(void *argument)
+{
 
 	// Setup
 	HAL_UART_Receive_IT(&huart6, incomingfromESP, 1);
@@ -53,30 +72,5 @@ void StartProgrammer(void *argument)
 
 
 	HAL_UART_Transmit(&huart3,ready,sizeof(ready),10);
-	for(;;)
-	{
-		uint8_t dataFromESP;
-		uint8_t dataFromSTM;
-		if(circular_buf_get(cbufESPToSTM, &dataFromESP)==0)
-		{
-			HAL_UART_Transmit(&huart3,&dataFromESP,sizeof(dataFromESP),300);
-		}
-
-
-		if(circular_buf_get(cbufSTMToESP, &dataFromSTM)==0)
-		{
-			HAL_UART_Transmit(&huart6,&dataFromSTM,sizeof(dataFromSTM),300);
-			// and echo back for testing
-			HAL_UART_Transmit(&huart3,&dataFromSTM,sizeof(dataFromSTM),300);
-		}
-
-		//TODO: How do we know we're done?
-		bool readyToReset = false;
-		if( readyToReset )
-		{
-			Reset();
-			break;
-		}
-	}
 }
-
+*/

@@ -6,7 +6,7 @@
 
 void stub_tx_one_char(char ch)
 {
-	HAL_UART_Transmit(&huart6,ch,1,300);
+	HAL_UART_Transmit(&huart6,(uint8_t*)&ch, 1, 0xFFFF);
 }
 
 void SLIP_send_frame_delimiter(void) {
@@ -83,8 +83,8 @@ uint32_t SLIP_recv(void *pkt, uint32_t max_len) {
 
   int16_t r;
   do {
-	  uint8_t ch;
-	  HAL_UART_Receive(&huart6, ch,1,300);
+	  uint8_t ch = 0;
+	  HAL_UART_Receive(&huart6,(uint8_t*)&ch,1,300);
 	r = SLIP_recv_byte(ch, &state);
 	if(r >= 0 && len < max_len) {
 	  p[len++] = (uint8_t)r;
