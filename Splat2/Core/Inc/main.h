@@ -7,13 +7,12 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2022 STMicroelectronics.
-  * All rights reserved.</center></h2>
+  * Copyright (c) 2022 STMicroelectronics.
+  * All rights reserved.
   *
-  * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the
-  * License. You may obtain a copy of the License at:
-  *                        opensource.org/licenses/BSD-3-Clause
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
   *
   ******************************************************************************
   */
@@ -32,21 +31,12 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "tasks/espprogrammer.h"
-#include "circbuff.h"
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-UART_HandleTypeDef huart1;
-UART_HandleTypeDef huart2;
-extern  UART_HandleTypeDef huart3;
-extern  UART_HandleTypeDef huart6;
-extern  cbuf_handle_t cbufESPToSTM;
-extern  cbuf_handle_t cbufSTMToESP;
-// this separation of data from usage is why embedded is harder than it needs to be
-extern uint8_t incomingfromSTM[1];
-extern uint8_t incomingfromESP[1];
+
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -124,7 +114,6 @@ void Error_Handler(void);
 #define LD2_Pin GPIO_PIN_7
 #define LD2_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
-
 
 /* USER CODE END Private defines */
 
