@@ -1,5 +1,0 @@
-lcdcontroller.cpp:12:1:Integration::LCDController::LCDController(int)	16	static
-lcdcontroller.cpp:17:1:Integration::LCDController::~LCDController()	16	static
-lcdcontroller.cpp:17:1:virtual Integration::LCDController::~LCDController()	16	static
-lcdcontroller.cpp:20:6:void Integration::LCDController::PushPage()	16	static
-lcdcontroller.cpp:25:6:void Integration::LCDController::Refresh()	16	static

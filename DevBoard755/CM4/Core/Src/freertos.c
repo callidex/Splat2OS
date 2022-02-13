@@ -30,6 +30,8 @@
 #include "textual.h"
 #include "tokens.h"
 #include "exectoks.h"
+
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -154,14 +156,37 @@ void StartDefaultTask(void *argument)
 */
 
 
+
 //TODO: move to container class
 token* toksBody;
 char lineSpace[40 * 3];
-char uartRxBufStart, uartRxBufEnd;
-#define UART_RX_BUF_SIZE 8
 char lastInput;
 short prgSize;
-unsigned char uartRxBuf[UART_RX_BUF_SIZE];
+static short listLine, listPage;
+char mainState;
+char dataSpace[150 + 850];
+void preload(char* line, token* t) {
+    if (editorLoadParsed()) {
+        outputConstStr(ID_COMMON_STRINGS, 10, NULL); // code found, autorun message
+        outputCr();
+        setDelay(1000);
+        mainState = STATE_PRELOAD;
+    } else {
+        prgReset();
+    }
+}
+void init(short dataSize, short lineSize, short progSize) {
+    outputCr();
+    outputConstStr(ID_COMMON_STRINGS, 0, NULL); // Miskatino vX.X
+    outputCr();
+    initEditor(dataSpace + dataSize, progSize);
+    initTokenExecutor(dataSpace, dataSize);
+    listLine = 1;
+    listPage = 10;
+    mainState = STATE_INTERACTIVE;
+    toksBody = (token*)(void*) (lineSpace + lineSize);
+    preload(lineSpace, toksBody);
+}
 void showInfo(void) {
     outputConstStr(ID_COMMON_STRINGS, 1, NULL); // code:
     outputInt(prgSize);
@@ -185,21 +210,58 @@ void executeRun() {
         executeNonParsed(-1);
     }
 }
+
+
+void printProgram(void) {
+    prgline* p = findLine(listLine);
+    if (p->num == 0 && listLine > 1) {
+        p = findLine(1);
+    }
+    short lineCount = 0;
+    while (p->num != 0 && lineCount < listPage) {
+        listLine = p->num + 1;
+        outputInt(p->num);
+        outputChar(' ');
+        outputNStr(&(p->str));
+        outputCr();
+        p = findLine(p->num + 1);
+        lineCount += 1;
+    }
+}
+
+void listProgram(token* t) {
+    t = nextToken(nextToken(t));
+    if (t->type == TT_NUMBER) {
+        listLine = t->body.integer;
+        t = nextToken(t);
+        if (t->type == TT_NUMBER) {
+            listPage = t->body.integer;
+        }
+    }
+    printProgram();
+}
+
+void executeSteps() {
+    token* t = nextToken(nextToken(toksBody));
+    mainState |= STATE_STEPS;
+    executeNonParsed(t->type == TT_NUMBER ? t->body.integer : 1);
+}
 void metaOrError() {
     numeric h = tokenHash(toksBody);
-//    if (h == 0x3B6) { // LIST
-//        listProgram(toksBody);
-//    } else
-//    	if (h == 0x312) { // STEP
-//        executeSteps();
-//    } else
-    	if (h == 0x1AC) { // RUN
+    if (h == 0x3B6) { // LIST
+        listProgram(toksBody);
+    } else
+    	if (h == 0x312) { // STEP
+        executeSteps();
+    } else
+  	if (h == 0x1AC) { // RUN
         executeRun();
 //    } else if (h == 0x375) { // SAVE
 //        manualSave();
 //    } else if (h == 0x39A) { // LOAD
 //        manualLoad();
-    } else if (h == 0x69A) { // RESET
+//
+        } else if (h == 0x69A) { // RESET
         prgReset();
     } else if (h == 0x3B3) { // INFO
         showInfo();
@@ -215,10 +277,9 @@ void metaOrError() {
 int uartRead(void)
 {
 	unsigned char c;
-	if(uartRxBufStart == uartRxBufEnd) { return -1; }
-	c = uartRxBuf[uartRxBufStart];
-	uartRxBufStart = (uartRxBufStart + 1) % UART_RX_BUF_SIZE;
-	return c;
+	// just pop off the buffer
+	if(circular_buf_get(cbufInterpreter, &c)==0) return c;
+	return -1;
 }
 char sysGetc(void)
 {
@@ -240,13 +301,15 @@ void sysPutc(char c) {
 void sysEcho(char c) {
     sysPutc(c);
 }
-void uartSend(int c) {
-	HAL_UART_Transmit (&huart2, c, sizeof (c), 10);
-
+void uartSend(uint8_t c) {
+	 HAL_UART_Transmit(&huart3, &c, sizeof(c), 10);
+}
+void debugPrint(char * buff){
+	uartSends(buff);
 }
 
 void uartSends(char* s) {
-    while (*s) {
+	while (*s) {
         uartSend(*(s++));
     }
 }
@@ -310,7 +373,17 @@ void pinOut(char pin, schar state) {
 //        }
 //    }
 }
-
+void waitPreloadRunDelay() {
+    if (lastInput > 0) {
+        mainState &= ~STATE_PRELOAD;
+        outputConstStr(ID_COMMON_STRINGS, 11, NULL); // canceled
+        outputCr();
+        editorLoad();
+    } else if (checkDelay()) {
+        mainState &= ~STATE_PRELOAD;
+        initParsedRun();
+    }
+}
 void dispatch() {
     if (lastInput == 3) {
         mainState |= STATE_BREAK;
@@ -334,10 +407,10 @@ void dispatch() {
     }
     if ((mainState & STATE_STEPS) != 0) {
         executeNonParsed(0);
-/*
+
     } else if ((mainState & STATE_PRELOAD) != 0) {
         waitPreloadRunDelay();
-*/
+
     } else {
         if (lastInput > 0) {
             if (readLine()) {
@@ -475,14 +548,17 @@ char storageOperation(void* data, short size) {
 __weak void StartInterpreter(void *argument)
 {
   /* USER CODE BEGIN StartInterpreter */
-	HAL_UART_Receive_IT(&huart2, uartRxBuf,UART_RX_BUF_SIZE);
+	cbuffer  = malloc(100 * sizeof(uint8_t));
+	cbufInterpreter = circular_buf_init(cbuffer, 100);
+	HAL_UART_Receive_IT(&huart3, &uartRxBuf,1);
 	/* Infinite loop */
 
-
+	init(150, 40,850);
 	for(;;)
   {
-    lastInput = sysGetc();
-    dispatch();
+     lastInput = sysGetc();
+     if(lastInput>0)
+   	 	 dispatch();
   }
   /* USER CODE END StartInterpreter */
 }

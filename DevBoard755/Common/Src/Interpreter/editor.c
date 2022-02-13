@@ -23,7 +23,7 @@ void initEditor(char* prgBody, short progSpaceSize) {
     prgStore = prgBody;
     resetEditor();
 }
-char lineSpace[40 * 3];
+
 char readLine() {
     if (lastInput == '\r' || lastInput == '\n') {
         trim(lineSpace);
