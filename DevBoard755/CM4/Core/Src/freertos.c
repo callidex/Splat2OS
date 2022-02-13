@@ -26,11 +26,11 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "usart.h"
-#include "utils.h"
-#include "textual.h"
-#include "tokens.h"
-#include "exectoks.h"
-
+#include "Interpreter/utils.h"
+#include "Interpreter/textual.h"
+#include "Interpreter/tokens.h"
+#include "Interpreter/exectoks.h"
+#include "Integration/Controllers/Radio/SI446x.h"
 
 /* USER CODE END Includes */
 
@@ -548,11 +548,15 @@ char storageOperation(void* data, short size) {
 __weak void StartInterpreter(void *argument)
 {
   /* USER CODE BEGIN StartInterpreter */
+
+//	Integration::Si446x handle = new Integration::Si446x();
+
+
 	cbuffer  = malloc(100 * sizeof(uint8_t));
 	cbufInterpreter = circular_buf_init(cbuffer, 100);
 	HAL_UART_Receive_IT(&huart3, &uartRxBuf,1);
 	/* Infinite loop */
-
+	SI446xx * h = create_SI446x(0);
 	init(150, 40,850);
 	for(;;)
   {
