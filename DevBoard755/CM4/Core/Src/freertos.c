@@ -556,7 +556,6 @@ __weak void StartInterpreter(void *argument)
 	cbufInterpreter = circular_buf_init(cbuffer, 100);
 	HAL_UART_Receive_IT(&huart3, &uartRxBuf,1);
 	/* Infinite loop */
-	SI446xx * h = create_SI446x(0);
 	init(150, 40,850);
 	for(;;)
   {

@@ -31,7 +31,8 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "Interpreter/circbuff.h"
+
+#include "circbuff.h"
 #include "Integration/Controllers/Radio/SI446x.h"
 uint8_t * cbuffer;
 cbuf_handle_t cbufInterpreter;

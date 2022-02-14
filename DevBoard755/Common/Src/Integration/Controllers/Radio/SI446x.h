@@ -13,13 +13,8 @@
 #include <stdarg.h>
 #include "si446x_cmd.h"
 #include "stm32h7xx_hal.h"
+#include "stm32h7xx_hal_spi.h"
 
-
-
-struct SI446xx
-{
-	SI446xx(uint8_t*);
-};
 
 #define SI466X_FIFO_SIZE 64
 #define RADIO_CTS_TIMEOUT
@@ -37,7 +32,7 @@ public:
 	uint8_t Pro2Cmd[7];
 	union si446x_cmd_reply_union Si446xCmd;
 	SI446x();
-	SI446x(uint8_t*  hspi);
+	SI446x(SPI_HandleTypeDef *  hspi);
 	virtual ~SI446x();
 	void reset(void);
 	void power_up(uint8_t BOOT_OPTIONS, uint8_t XTAL_OPTIONS,
@@ -111,7 +106,7 @@ public:
 	void fifo_info_fast_read(void);
 
 private:
-	uint8_t*  _hspi;
+	SPI_HandleTypeDef *  _hspi;
 	uint8_t radio_comm_GetResp(uint8_t byteCount, uint8_t *pData);
 	void radio_comm_SendCmd(uint8_t byteCount, uint8_t *pData);
 	void radio_comm_ReadData(uint8_t cmd, bool pollCts, uint8_t byteCount,

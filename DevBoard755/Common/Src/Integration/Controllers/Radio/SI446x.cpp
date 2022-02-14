@@ -6,11 +6,10 @@
  */
 
 #include "SI446x.h"
-#include "si446x_cmd.h"
 
 
 
-SI446x::SI446x(uint8_t *hspi) {
+SI446x::SI446x(SPI_HandleTypeDef *hspi) {
 	this->_hspi = hspi;
 }
 SI446x::SI446x() {
@@ -713,23 +712,4 @@ void radio_hal_SpiReadData(uint8_t byteCount, uint8_t *pData) {
 //  SpiReadData(byteCount, pData);
 }
 
-
-
-
-
-
-extern "C"
-{
-
-
-typedef SI446xx * SI446xHandle;
-SI446xHandle create_SI446x(uint8_t* h);
-void    free_SI446x(SI446xHandle);
-
-
-
-SI446xHandle create_SI446x(uint8_t * h) { return (SI446xHandle) new  SI446x(h); }
-void    free_SI446x(SI446xHandle);
-
-}
 
