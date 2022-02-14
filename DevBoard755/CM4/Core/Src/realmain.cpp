@@ -22,26 +22,20 @@
 #include "spi.h"
 #include "usart.h"
 #include "gpio.h"
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+#include "Integration/Controllers/Radio/SI446x.h"
 
 void real_main(void)
 {
 
   // hand over control to the dark side
   SI446x * tx = new SI446x(&hspi4);
+  tx->nop();
+
   /* Start scheduler */
   osKernelStart();
   while (1) {}
 }
 
 
-#ifdef __cplusplus
-}
-#endif
 
 

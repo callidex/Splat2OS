@@ -13,11 +13,9 @@ SI446x::SI446x(SPI_HandleTypeDef *hspi) {
 	this->_hspi = hspi;
 }
 SI446x::SI446x() {
-
 }
 
 SI446x::~SI446x() {
-	// TODO Auto-generated destructor stub
 }
 
 void SI446x::reset(void) {
@@ -218,7 +216,7 @@ inline void SI446x::change_state(uint8_t NEXT_STATE1) {
 	radio_comm_SendCmd( SI446X_CMD_ARG_COUNT_CHANGE_STATE, Pro2Cmd);
 }
 
-inline void SI446x::nop(void) {
+void SI446x::nop(void) {
 	Pro2Cmd[0] = SI446X_CMD_ID_NOP;
 
 	radio_comm_SendCmd( SI446X_CMD_ARG_COUNT_NOP, Pro2Cmd);
@@ -698,17 +696,17 @@ void SI446x::radio_hal_SpiWriteByte(uint8_t byteToWrite) {
 //  SpiReadWrite(byteToWrite);
 }
 
-uint8_t radio_hal_SpiReadByte(void) {
+uint8_t SI446x::radio_hal_SpiReadByte(void) {
 	return 0;
 	//return SpiReadWrite(0xFF);
 }
 
-void radio_hal_SpiWriteData(uint8_t byteCount, uint8_t *pData) {
+void SI446x::radio_hal_SpiWriteData(uint8_t byteCount, uint8_t *pData) {
 
 	//SpiWriteData(byteCount, pData);
 }
 
-void radio_hal_SpiReadData(uint8_t byteCount, uint8_t *pData) {
+void SI446x::radio_hal_SpiReadData(uint8_t byteCount, uint8_t *pData) {
 //  SpiReadData(byteCount, pData);
 }
 

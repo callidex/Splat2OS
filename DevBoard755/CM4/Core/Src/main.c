@@ -32,7 +32,6 @@
 /* USER CODE BEGIN PTD */
 
 
-int real_main();
 
 /* USER CODE END PTD */
 

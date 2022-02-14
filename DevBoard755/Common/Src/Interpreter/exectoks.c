@@ -1,4 +1,5 @@
 #include "mystdlib.h"
+#include <stdint.h>
 #include "mytypes.h"
 #include "tokens.h"
 #include "tokenint.h"
@@ -101,13 +102,13 @@ char findVar(short name) {
 }
 
 numeric getVar(short name) {
-    char i = findVar(name);
+    uint8_t i = findVar(name);
     return (vars[i].name == name) ? vars[i].value : 0;
 }
 
 short getArrayOffset(char letter) {
     short name = shortArrayName(letter);
-    char i = findVar(name);
+    uint8_t i = findVar(name);
     return (vars[i].name == name) ? vars[i].value : -1;
 }
 
@@ -122,7 +123,7 @@ char checkLowVarsMemory(short toAddBytes) {
 }
 
 void setVar(short name, numeric value) {
-    char i = findVar(name);
+	uint8_t i = findVar(name);
     if (vars[i].name != name) {
         if (checkLowVarsMemory(sizeof(varHolder))) {
             return;
@@ -343,7 +344,7 @@ void execDim(void) {
         advance();
         itemSize = 1;
     }
-    char pos = findVar(name);
+    uint8_t pos = findVar(name);
     if (vars[pos].name == name) {
         return;
     }
@@ -356,7 +357,7 @@ void execDim(void) {
 
 void execData(void) {
     char a = (lastDim & 0x1F) | 0x40; // capital letter
-    char i;
+    uint8_t i;
     if (a < 'A' || a > 'Z') {
         return;
     }
@@ -484,7 +485,7 @@ void execEnd(void) {
 }
 
 void execExtra(char cmd) {
-    char n = extraCmdArgCnt[cmd];
+	uint8_t n = extraCmdArgCnt[cmd];
     char i;
     sp -= n;
     for (i = 0; i < n; i++) {
