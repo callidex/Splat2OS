@@ -33,6 +33,9 @@
 #include "Integration/Controllers/Radio/SI446x.h"
 #include "realmain.h"
 /* USER CODE END Includes */
+uint8_t * cbuffer;
+cbuf_handle_t cbufInterpreter;
+uint8_t  uartRxBuf[1];
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */

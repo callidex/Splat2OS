@@ -8,13 +8,13 @@ extern "C" {
 #endif
 /* Includes ------------------------------------------------------------------*/
 #include "stm32h7xx_hal.h"
-
+#include "cmsis_os.h"
 #include "circbuff.h"
+#include "spi.h"
+#include "usart.h"
+#include "gpio.h"
 #include "Integration/Controllers/Radio/SI446x.h"
 
-uint8_t * cbuffer;
-cbuf_handle_t cbufInterpreter;
-uint8_t  uartRxBuf[1];
 
 
 void real_main();

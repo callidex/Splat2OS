@@ -18,11 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "realmain.h"
-#include "cmsis_os.h"
-#include "spi.h"
-#include "usart.h"
-#include "gpio.h"
-#include "Integration/Controllers/Radio/SI446x.h"
 
 void real_main(void)
 {
@@ -30,6 +25,12 @@ void real_main(void)
   // hand over control to the dark side
   SI446x * tx = new SI446x(&hspi4);
   tx->nop();
+  tx->apply_patch();
+  tx->fifo_info_fast_read();
+  tx->get_chip_status_fast_clear();
+
+
+  tx->change_state(0);
 
   /* Start scheduler */
   osKernelStart();
