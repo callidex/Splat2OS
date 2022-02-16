@@ -11,20 +11,19 @@
 
 SI446x::SI446x(SPI_HandleTypeDef *hspi) {
 	this->_hspi = hspi;
-}
-SI446x::SI446x() {
+	RF_NIRQ = RF_NSEL = PWRDN = 0;
 }
 
 SI446x::~SI446x() {
 }
-
+#define SDN_DELAY 10
 void SI446x::reset(void) {
 	/* Put radio in shutdown, wait then release */
 	radio_hal_AssertShutdown();
-	HAL_Delay(10);
+	HAL_Delay(SDN_DELAY);
 
 	radio_hal_DeassertShutdown();
-	HAL_Delay(10);
+	HAL_Delay(SDN_DELAY);
 
 	radio_comm_ClearCTS();
 
@@ -35,10 +34,10 @@ inline void SI446x::power_up(uint8_t BOOT_OPTIONS, uint8_t XTAL_OPTIONS,
 	Pro2Cmd[0] = SI446X_CMD_ID_POWER_UP;
 	Pro2Cmd[1] = BOOT_OPTIONS;
 	Pro2Cmd[2] = XTAL_OPTIONS;
-	Pro2Cmd[3] = (uint8_t) (XO_FREQ >> 24);
-	Pro2Cmd[4] = (uint8_t) (XO_FREQ >> 16);
-	Pro2Cmd[5] = (uint8_t) (XO_FREQ >> 8);
-	Pro2Cmd[6] = (uint8_t) (XO_FREQ);
+	Pro2Cmd[3] = static_cast<uint8_t>((XO_FREQ >> 24)); // @suppress("Avoid magic numbers")
+	Pro2Cmd[4] = static_cast<uint8_t>((XO_FREQ >> 16)); // @suppress("Avoid magic numbers")
+	Pro2Cmd[5] = static_cast<uint8_t>((XO_FREQ >> 8)); // @suppress("Avoid magic numbers")
+	Pro2Cmd[6] = static_cast<uint8_t>((XO_FREQ)); // @suppress("Avoid magic numbers")
 
 	radio_comm_SendCmd( SI446X_CMD_ARG_COUNT_POWER_UP, Pro2Cmd);
 }
@@ -58,7 +57,7 @@ inline uint8_t SI446x::configuration_init(const uint8_t *pSetPropCmd) {
 
 		if (numOfBytes > 16u) {
 			/* Number of command bytes exceeds maximal allowable length */
-			return SI446X_COMMAND_ERROR;
+			return (SI446X_COMMAND_ERROR);
 		}
 
 		for (col = 0u; col < numOfBytes; col++) {
@@ -68,7 +67,7 @@ inline uint8_t SI446x::configuration_init(const uint8_t *pSetPropCmd) {
 
 		if (radio_comm_SendCmdGetResp(numOfBytes, Pro2Cmd, 0, 0) != 0xFF) {
 			/* Timeout occured */
-			return SI446X_CTS_TIMEOUT;
+			return (SI446X_CTS_TIMEOUT);
 		}
 
 		if (radio_hal_NirqLevel() == 0) {
@@ -100,7 +99,7 @@ inline void SI446x::part_info(void) {
 	Si446xCmd.PART_INFO.PART = ((uint16_t) Pro2Cmd[1] << 8) & 0xFF00;
 	Si446xCmd.PART_INFO.PART |= (uint16_t) Pro2Cmd[2] & 0x00FF;
 	Si446xCmd.PART_INFO.PBUILD = Pro2Cmd[3];
-	Si446xCmd.PART_INFO.ID = ((uint16_t) Pro2Cmd[4] << 8) & 0xFF00;
+	Si446xCmd.PART_INFO.ID = (static_cast<uint16_t>(Pro2Cmd[4]) << 8) & 0xFF00;
 	Si446xCmd.PART_INFO.ID |= (uint16_t) Pro2Cmd[5] & 0x00FF;
 	Si446xCmd.PART_INFO.CUSTOMER = Pro2Cmd[6];
 	Si446xCmd.PART_INFO.ROMID = Pro2Cmd[7];
@@ -114,11 +113,11 @@ inline void SI446x::start_tx(uint8_t CHANNEL, uint8_t CONDITION,
 	Pro2Cmd[2] = CONDITION;
 	Pro2Cmd[3] = (uint8_t) (TX_LEN >> 8);
 	Pro2Cmd[4] = (uint8_t) (TX_LEN);
-	Pro2Cmd[5] = 0x00;
+	Pro2Cmd[5] = 0x00;  
 
 	// Don't repeat the packet,
 	// ie. transmit the packet only once
-	Pro2Cmd[6] = 0x00;
+	Pro2Cmd[6] = 0x00; 
 
 	radio_comm_SendCmd( SI446X_CMD_ARG_COUNT_START_TX, Pro2Cmd);
 
@@ -131,8 +130,8 @@ inline void SI446x::start_rx(uint8_t CHANNEL, uint8_t CONDITION,
 	Pro2Cmd[0] = SI446X_CMD_ID_START_RX;
 	Pro2Cmd[1] = CHANNEL;
 	Pro2Cmd[2] = CONDITION;
-	Pro2Cmd[3] = (uint8_t) (RX_LEN >> 8);
-	Pro2Cmd[4] = (uint8_t) (RX_LEN);
+	Pro2Cmd[3] = static_cast<uint8_t>((RX_LEN >> 8));
+	Pro2Cmd[4] = static_cast<uint8_t>((RX_LEN));
 	Pro2Cmd[5] = NEXT_STATE1;
 	Pro2Cmd[6] = NEXT_STATE2;
 	Pro2Cmd[7] = NEXT_STATE3;
@@ -344,13 +343,14 @@ inline void SI446x::get_packet_info(uint8_t FIELD_NUMBER_MASK, uint16_t LEN,
 	Pro2Cmd[3] = (uint8_t)(LEN);
 	// the different of the byte, althrough it is signed, but to command hander
 	// it can treat it as unsigned
-	Pro2Cmd[4] = (uint8_t)((uint16_t) DIFF_LEN >> 8);
+	Pro2Cmd[4] = static_cast<uint8_t>(((uint16_t) (DIFF_LEN) >> 8));
 	Pro2Cmd[5] = (uint8_t)(DIFF_LEN);
 
 	radio_comm_SendCmdGetResp( SI446X_CMD_ARG_COUNT_PACKET_INFO, Pro2Cmd,
 	SI446X_CMD_REPLY_COUNT_PACKET_INFO, Pro2Cmd);
 
-	Si446xCmd.PACKET_INFO.LENGTH = ((uint16_t) Pro2Cmd[0] << 8) & 0xFF00;
+	Si446xCmd.PACKET_INFO.LENGTH = (static_cast<uint16_t>(Pro2Cmd[0]) << 8)
+			& 0xFF00;
 	Si446xCmd.PACKET_INFO.LENGTH |= (uint16_t) Pro2Cmd[1] & 0x00FF;
 }
 
@@ -379,8 +379,10 @@ Si446xCmd.GET_MODEM_STATUS.CURR_RSSI = Pro2Cmd[2];
 Si446xCmd.GET_MODEM_STATUS.LATCH_RSSI = Pro2Cmd[3];
 Si446xCmd.GET_MODEM_STATUS.ANT1_RSSI = Pro2Cmd[4];
 Si446xCmd.GET_MODEM_STATUS.ANT2_RSSI = Pro2Cmd[5];
-Si446xCmd.GET_MODEM_STATUS.AFC_FREQ_OFFSET = ((uint16_t) Pro2Cmd[6] << 8) & 0xFF00;
-Si446xCmd.GET_MODEM_STATUS.AFC_FREQ_OFFSET |= (uint16_t) Pro2Cmd[7] & 0x00FF;
+	Si446xCmd.GET_MODEM_STATUS.AFC_FREQ_OFFSET =
+			(static_cast<uint16_t>(Pro2Cmd[6]) << 8) & 0xFF00;
+	Si446xCmd.GET_MODEM_STATUS.AFC_FREQ_OFFSET |=
+			static_cast<uint16_t>(Pro2Cmd[7]) & 0x00FF;
 
 }
 

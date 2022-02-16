@@ -3,17 +3,17 @@
 
 #include "utils.h"
 
-extern char* prgStore;
-extern short prgSize;
+extern uint8_t* prgStore;
+extern uint16_t prgSize;
 
 void resetEditor(void);
-void initEditor(char* prgBody, short progSpaceSize);
-char readLine();
-prgline* findLine(short num);
-void injectLine(char* s, short num);
-char editorSave(void);
-char editorLoad(void);
-char editorLoadParsed(void);
+void initEditor(uint8_t* prgBody, uint16_t progSpaceSize);
+uint8_t readLine();
+prgline* findLine(uint16_t num);
+void injectLine(uint8_t* s, uint16_t num);
+uint8_t editorSave(void);
+uint8_t editorLoad(void);
+uint8_t editorLoadParsed(void);
 
 #endif
 

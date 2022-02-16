@@ -6,11 +6,11 @@
 #include "textual.h"
 
 extern token* toksBody;
-char* prgStore;
-short prgSize;
-static short maxProgSize;
-static char lineSpacePos;
-char lastInput;
+uint8_t* prgStore;
+uint16_t prgSize;
+static uint16_t maxProgSize;
+static uint8_t lineSpacePos;
+uint8_t lastInput;
 
 void resetEditor(void) {
     ((prgline*)prgStore)->num = 0;
@@ -18,13 +18,13 @@ void resetEditor(void) {
     lineSpacePos = 0;
 }
 
-void initEditor(char* prgBody, short progSpaceSize) {
+void initEditor(uint8_t* prgBody, uint16_t progSpaceSize) {
     maxProgSize = progSpaceSize;
     prgStore = prgBody;
     resetEditor();
 }
 
-char readLine() {
+uint8_t readLine() {
     if (lastInput == '\r' || lastInput == '\n') {
         trim(lineSpace);
         lineSpace[lineSpacePos] = 0;
@@ -51,20 +51,19 @@ prgline* nextLine(prgline* p) {
     return (prgline*)(void*)((char*)(void*)p + lineSize(p));
 }
 
-prgline* findLine(short num) {
+prgline* findLine(uint16_t num) {
     prgline* p = (prgline*)(void*)prgStore;
     while (p->num != 0 && p->num < num) {
         p = nextLine(p);
     }
     return p;
 }
-
-void injectLine(char* s, short num) {
-    unsigned char len;
+void injectLine(uint8_t* s, uint16_t num) {
+	uint8_t len;
     prgline* p = findLine(num);
     if (p->num == num) {
-        len = (char*)(void*)nextLine(p) - (char*)(void*)p;
-        memmove(p, nextLine(p), prgStore + prgSize - (char*)(void*)nextLine(p));
+        len = (uint8_t*)(void*)nextLine(p) - (uint8_t)(void*)p;
+        memmove(p, nextLine(p), prgStore + prgSize - (uint8_t*)(void*)nextLine(p));
         prgSize -= len;
     }
     len = strlen(s);
@@ -75,7 +74,7 @@ void injectLine(char* s, short num) {
         return;
     }
     if (len > 0) {
-        memmove((char*)(void*)p + len + 3, p, prgStore + prgSize - (char*)(void*)p);
+        memmove((uint8_t*)(void*)p + len + 3, p, prgStore + prgSize - (uint8_t*)(void*)p);
         prgSize += len + 3;
         p->num = num;
         p->str.len = len;
@@ -83,7 +82,7 @@ void injectLine(char* s, short num) {
     }
 }
 
-char editorSave(void) {
+uint8_t editorSave(void) {
     if (!storageOperation(NULL, 1)) {
         return 0;
     }
@@ -93,7 +92,7 @@ char editorSave(void) {
     return 1;
 }
 
-char editorLoad(void) {
+uint8_t editorLoad(void) {
     if (!storageOperation(NULL, -1)) {
         return 0;
     }
@@ -103,7 +102,7 @@ char editorLoad(void) {
     return 1;
 }
 
-char editorLoadParsed() {
+uint8_t editorLoadParsed() {
     void* p = prgStore;
     unsigned char len;
     if (!storageOperation(NULL, -1)) {

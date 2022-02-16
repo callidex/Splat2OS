@@ -484,9 +484,9 @@ void execEnd(void) {
     nextLineNum = 32767;
 }
 
-void execExtra(char cmd) {
+void execExtra(uint8_t cmd) {
 	uint8_t n = extraCmdArgCnt[cmd];
-    char i;
+	uint8_t i;
     sp -= n;
     for (i = 0; i < n; i++) {
         calcStack[sp + i] = calcExpression();

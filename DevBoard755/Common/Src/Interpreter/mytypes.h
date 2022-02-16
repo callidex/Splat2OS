@@ -31,13 +31,13 @@ typedef struct prgline {
 
 typedef union tbody {
     numeric integer;
-    char symbol;
-    char command;
+    uint8_t symbol;
+    uint8_t command;
     nstring str;
 } tbody;
 
 typedef struct token {
-    char type;
+	uint8_t type;
     tbody body;
 } __attribute__((packed)) token;
 

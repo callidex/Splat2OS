@@ -178,7 +178,7 @@ void shuntingYard(token* next) {
 }
 
 void convertToRpn(token* next) {
-    char buf[MAX_LINE_LEN * 2];
+	uint8_t buf[MAX_LINE_LEN * 2];
     curTok->type = TT_ERROR;
     memcpy(buf, next, ((char*)(void*)curTok) - ((char*)(void*)next) + 1);
     curTok = next;
@@ -190,9 +190,9 @@ void convertToRpn(token* next) {
 
 char parseExpression(void) {
     token* startTok = curTok;
-    char funcBrackets[16];
-    char iFuncBr = 0;
-    char state = '1';
+    uint8_t funcBrackets[16];
+    uint8_t iFuncBr = 0;
+    uint8_t state = '1';
     funcBrackets[iFuncBr] = 0;
     if (*getCurTokPos() == 0) {
         setTokenError(getCurTokPos(), 10);

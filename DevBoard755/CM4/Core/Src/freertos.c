@@ -289,9 +289,11 @@ char sysGetc(void)
 	short c = uartRead();
 	return c>=0? (char) c:0;
 }
-
+void uartSend(uint8_t c) {
+	 HAL_UART_Transmit(&huart3, &c, sizeof(c), 10);
+}
 char mainState;
-void sysPutc(char c) {
+void sysPutc(uint8_t c) {
     if (c == '\n') {
         uartSend('\r');
     } else if (c == '\b') {
@@ -301,21 +303,19 @@ void sysPutc(char c) {
     uartSend(c);
 }
 
-void sysEcho(char c) {
+void sysEcho(uint8_t c) {
     sysPutc(c);
 }
-void uartSend(uint8_t c) {
-	 HAL_UART_Transmit(&huart3, &c, sizeof(c), 10);
-}
-void debugPrint(char * buff){
-	uartSends(buff);
-}
-
-void uartSends(char* s) {
+void uartSends(uint8_t* s) {
 	while (*s) {
         uartSend(*(s++));
     }
 }
+void debugPrint(uint8_t * buff){
+	uartSends(buff);
+}
+
+
 char hex[] = "0123456789ABCDEF";
 void uartSendHex(int x, int d) {
     while (d-- > 0) {
@@ -325,7 +325,8 @@ void uartSendHex(int x, int d) {
 
 void uartSendDec(int x) {
     static char s[10];
-    int i, x1;
+    int i;
+    int x1;
     i = 0;
     while (x > 0) {
         x1 = x / 10;
@@ -542,9 +543,11 @@ static void storageSend(uchar c) {
 }
 
 unsigned char storageChecksum(short size) {
+	return 0;
 }
 
 char storageOperation(void* data, short size) {
+	return 0;
 }
 
 /* USER CODE END Header_StartInterpreter */
