@@ -32,6 +32,7 @@ public:
 	uint8_t Pro2Cmd[7];
 	union si446x_cmd_reply_union Si446xCmd;
 	SI446x();
+	void led(bool on);
 	SI446x(SPI_HandleTypeDef *  hspi);
 	virtual ~SI446x();
 	void reset(void);

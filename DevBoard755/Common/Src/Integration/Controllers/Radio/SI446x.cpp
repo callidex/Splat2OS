@@ -12,6 +12,41 @@
 SI446x::SI446x(SPI_HandleTypeDef *hspi) {
 	this->_hspi = hspi;
 	RF_NIRQ = RF_NSEL = PWRDN = 0;
+	reset();
+	// lets get the GIPIO3 pin to flash a couple of times for good measure
+	led(true);
+	HAL_Delay(500);
+	led(false);
+	HAL_Delay(500);
+	led(true);
+	HAL_Delay(500);
+	led(false);
+	HAL_Delay(500);
+
+}
+
+void SI446x::led(bool on)
+{
+	 gpio_pin_cfg(    //U8 GPIO0, U8 GPIO1, U8 GPIO2, U8 GPIO3, U8 NIRQ, U8 SDO, U8 GEN_CONFIG)
+
+	                        SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_DONOTHING,
+
+	                        SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_DONOTHING,
+
+	                        on? SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_DRIVE0: SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_DRIVE1,
+
+	                        SI446X_CMD_GPIO_PIN_CFG_ARG_GPIO_GPIO_MODE_ENUM_DONOTHING,
+
+	                        SI446X_CMD_GPIO_PIN_CFG_ARG_NIRQ_NIRQ_MODE_ENUM_DONOTHING,
+
+	                        SI446X_CMD_GPIO_PIN_CFG_ARG_SDO_SDO_MODE_ENUM_SDO,
+
+	                        (SI446X_CMD_GPIO_PIN_CFG_REP_GEN_CONFIG_DRV_STRENGTH_ENUM_HIGH
+
+	                         << SI446X_CMD_GPIO_PIN_CFG_REP_GEN_CONFIG_DRV_STRENGTH_LSB)
+
+	                        & SI446X_CMD_GPIO_PIN_CFG_REP_GEN_CONFIG_DRV_STRENGTH_MASK);
+
 }
 
 SI446x::~SI446x() {

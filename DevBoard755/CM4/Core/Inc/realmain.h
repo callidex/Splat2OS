@@ -8,7 +8,7 @@ extern "C" {
 #endif
 /* Includes ------------------------------------------------------------------*/
 #include "stm32h7xx_hal.h"
-#define _TTT_ NULL
+
 #include "cmsis_os.h"
 #include "circbuff.h"
 #include "spi.h"
