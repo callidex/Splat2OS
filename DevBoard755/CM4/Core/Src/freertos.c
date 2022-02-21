@@ -124,7 +124,9 @@ void MX_FREERTOS_Init(void) {
   interpreterHandle = osThreadNew(StartInterpreter, NULL, &interpreter_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
+
+
+
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */

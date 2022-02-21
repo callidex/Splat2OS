@@ -3,24 +3,24 @@
 
 #include "mytypes.h"
 
-void trim(char* s);
-char* skipSpaces(char* s);
-char* skipDigits(char* s);
-char charInStr(char c, char* s);
-char cmpNStrToStr(nstring* ns, char* s);
-int decFromStr(char* s);
-char isDigit(char c);
-char isDigitBased(char c, char base);
-char isAlpha(char c);
-char isAlNum(char c);
-char isSpace(char c);
-char toUpper(char c);
-char makeDigit(char c, char base);
+void trim(uint8_t * s);
+uint8_t * skipSpaces(uint8_t * s);
+uint8_t * skipDigits(uint8_t * s);
+uint8_t InStr(uint8_t  c, uint8_t * s);
+uint8_t  cmpNStrToStr(nstring* ns, uint8_t * s);
+int decFromStr(uint8_t * s);
+uint8_t  isDigit(uint8_t  c);
+uint8_t  isDigitBased(uint8_t  c, uint8_t  base);
+uint8_t  isAlpha(uint8_t  c);
+uint8_t  isAlNum(uint8_t  c);
+uint8_t  isSpace(uint8_t  c);
+uint8_t toUpper(uint8_t  c);
+uint8_t  makeDigit(uint8_t  c, uint8_t  base);
 numeric hashOfNStr(nstring* t);
 void pause(numeric millis);
 
-void outputChar(char c);
-void outputStr(char* s);
+void outputuint8_t (uint8_t  c);
+void outputStr(uint8_t * s);
 void outputNStr(nstring* s);
 void outputInt(long n);
 void outputCr();

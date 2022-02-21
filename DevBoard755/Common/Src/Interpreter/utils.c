@@ -2,7 +2,7 @@
 #include "utils.h"
 #include "extern.h"
 
-void trim(char* s) {
+void trim(uint8_t* s) {
     short i = 0, k;
     while (s[i] != 0 && s[i] <= ' ') {
         i++;
@@ -16,21 +16,21 @@ void trim(char* s) {
     } while (k >= 0 && s[k] <= ' ');
 }
 
-char* skipSpaces(char* s) {
+uint8_t* skipSpaces(uint8_t* s) {
     while (isSpace(*s)) {
         s++;
     }
     return s;
 }
 
-char* skipDigits(char* s) {
+uint8_t* skipDigits(uint8_t* s) {
     while (isDigit(*s)) {
         s++;
     }
     return s;
 }
 
-char charInStr(char c, char* s) {
+uint8_t charInStr(uint8_t c, uint8_t* s) {
     while (*s != 0) {
         if (*s == c) {
             return 1;
@@ -40,18 +40,18 @@ char charInStr(char c, char* s) {
     return 0;
 }
 
-char cmpNStrToStr(nstring* ns, char* s) {
+uint8_t cmpNStrToStr(nstring* ns, uint8_t* s) {
     if (ns->len != strlen(s)) {
         return 0;
     }
     return memcmp(&(ns->text), s, ns->len) == 0;
 }
 
-void outputChar(char c) {
+void outputChar(uint8_t c) {
     sysPutc(c);
 }
 
-void outputStr(char* s) {
+void outputStr(uint8_t* s) {
     while (*s) {
         sysPutc(*(s++));
     }
@@ -83,9 +83,9 @@ void outputInt(long n) {
     }
 }
 
-int decFromStr(char* s) {
-    schar sign = 1;
-    char base = 10;
+int decFromStr(uint8_t* s) {
+    int8_t sign = 1;
+    uint8_t base = 10;
     int res = 0;
     if (*s == '-') {
         sign = -1;
@@ -113,20 +113,20 @@ void outputCr() {
     sysPutc('\n');
 }
 
-char toUpper(char c) {
+uint8_t toUpper(uint8_t c) {
     return (c >= 'a' && c <= 'z') ? c - ('a' - 'A') : c;
 }
 
-char isAlpha(char c) {
+uint8_t isAlpha(uint8_t c) {
     c = toUpper(c);
     return c >= 'A' && c <= 'Z';
 }
 
-char isDigit(char c) {
+uint8_t isDigit(uint8_t c) {
     return c >= '0' && c <= '9';
 }
 
-char isDigitBased(char c, char base) {
+uint8_t isDigitBased(uint8_t c, uint8_t base) {
     if (c < '0') {
         return 0;
     } else if (c <= '9') {
@@ -137,7 +137,7 @@ char isDigitBased(char c, char base) {
     }
 }
 
-char makeDigit(char c, char base) {
+uint8_t makeDigit(uint8_t c, uint8_t base) {
     if (c < '0') {
         return 0;
     } else if (c <= '9') {
@@ -147,11 +147,11 @@ char makeDigit(char c, char base) {
     }
 }
 
-char isAlNum(char c) {
+uint8_t isAlNum(uint8_t c) {
     return isDigit(c) || isAlpha(c);
 }
 
-char isSpace(char c) {
+uint8_t isSpace(uint8_t c) {
     switch (c) {
         case ' ':
         case '\t':
@@ -165,7 +165,7 @@ char isSpace(char c) {
 }
 
 numeric hashOfNStr(nstring* t) {
-    char i = 0, n = t->len;
+    uint8_t i = 0, n = t->len;
     numeric res = 0;
     while (i < n) {
         res = (res << 1) ^ t->text[i];

@@ -7,21 +7,49 @@
 
 #include "SI446x.h"
 
+osThreadId_t SI446x::createThread(){
 
+	osThreadAttr_t defaultTask_attributes;
+	defaultTask_attributes.name = "si446Task";
+	defaultTask_attributes.stack_size = 128 * 4;
+    defaultTask_attributes.priority = (osPriority_t) osPriorityNormal;
+	threadHandle = osThreadNew((TaskFunction_t) &SI446x::threadRunner, NULL, &defaultTask_attributes);
+}
 
-SI446x::SI446x(SPI_HandleTypeDef *hspi) {
-	this->_hspi = hspi;
-	RF_NIRQ = RF_NSEL = PWRDN = 0;
+void SI446x::threadRunner(void const * argument)
+{
+	// run it in a thread since you need the HAL up and running
+	RF_NIRQ = RF_NSEL = PWRDN = false;
+
+	//this->get_chip_status_fast_clear()
 	reset();
+	get_chip_status(0);
+
 	// lets get the GIPIO3 pin to flash a couple of times for good measure
 	led(true);
-	HAL_Delay(500);
+	osDelay(500);
 	led(false);
-	HAL_Delay(500);
+	osDelay(500);
 	led(true);
-	HAL_Delay(500);
+	osDelay(500);
 	led(false);
-	HAL_Delay(500);
+	osDelay(500);
+
+}
+
+
+SI446x::SI446x(SPI_HandleTypeDef *  hspi, GPIO_TypeDef * nsel_port, uint16_t nsel_pin, GPIO_TypeDef * shutdown_port, uint16_t shutdown_pin ,  GPIO_TypeDef * cts_port, uint16_t cts_pin  )
+{
+	this->_hspi = hspi;
+	this->createThread();
+//    this->nsel_func = fnsel;
+//    this->shutdown_func = shutdown;
+	this->_shutdown_pin = shutdown_pin;
+	this->_shutdown_port = shutdown_port;
+	this->_nsel_pin = nsel_pin;
+	this->_nsel_port = nsel_port;
+	this->_cts_pin = cts_pin;
+	this->_cts_port = cts_port;
 
 }
 
@@ -55,10 +83,10 @@ SI446x::~SI446x() {
 void SI446x::reset(void) {
 	/* Put radio in shutdown, wait then release */
 	radio_hal_AssertShutdown();
-	HAL_Delay(SDN_DELAY);
+	osDelay(SDN_DELAY);
 
 	radio_hal_DeassertShutdown();
-	HAL_Delay(SDN_DELAY);
+	osDelay(SDN_DELAY);
 
 	radio_comm_ClearCTS();
 
@@ -619,7 +647,7 @@ inline void SI446x::radio_comm_WriteData(uint8_t cmd, bool pollCts,
 	radio_hal_SpiWriteByte(cmd);
 	radio_hal_SpiWriteData(byteCount, pData);
 	radio_hal_SetNsel();
-	ctsWentHigh = 0;
+	ctsWentHigh = false;
 }
 
 inline uint8_t SI446x::radio_comm_GetResp(uint8_t byteCount,
@@ -654,7 +682,7 @@ inline uint8_t SI446x::radio_comm_GetResp(uint8_t byteCount,
 	}
 
 	if (ctsVal == 0xFF) {
-		ctsWentHigh = 1;
+		ctsWentHigh = true;
 	}
 
 	return ctsVal;
@@ -668,7 +696,7 @@ inline void SI446x::radio_comm_SendCmd(uint8_t byteCount,
 	radio_hal_ClearNsel();
 	radio_hal_SpiWriteData(byteCount, pData);
 	radio_hal_SetNsel();
-	ctsWentHigh = 0;
+	ctsWentHigh = false;
 }
 
 inline void SI446x::radio_comm_ReadData(uint8_t cmd, bool pollCts,
@@ -682,19 +710,18 @@ inline void SI446x::radio_comm_ReadData(uint8_t cmd, bool pollCts,
 	radio_hal_SpiWriteByte(cmd);
 	radio_hal_SpiReadData(byteCount, pData);
 	radio_hal_SetNsel();
-	ctsWentHigh = 0;
+	ctsWentHigh = false;
 }
 inline uint8_t SI446x::radio_comm_PollCTS(void) {
-#ifdef RADIO_USER_CFG_USE_GPIO1_FOR_CTS
-    while(!radio_hal_Gpio1Level())
+
+    while( HAL_GPIO_ReadPin(_cts_port, _cts_pin) == GPIO_PIN_RESET)
     {
-        /* Wait...*/
+    	osDelay(10);
     }
-    ctsWentHigh = 1;
+    ctsWentHigh = true;
     return 0xFF;
-#else
-	return radio_comm_GetResp(0, 0);
-#endif
+//	return radio_comm_GetResp(0, 0);
+//#endif
 }
 
 inline uint8_t SI446x::radio_comm_SendCmdGetResp(
@@ -706,23 +733,35 @@ inline uint8_t SI446x::radio_comm_SendCmdGetResp(
 }
 
 inline void SI446x::radio_comm_ClearCTS(void) {
-	ctsWentHigh = 0;
+	ctsWentHigh = false;
 }
 
 void SI446x::radio_hal_AssertShutdown(void) {
-	PWRDN = 1;
+	PWRDN = true;
+	shutdown(PWRDN);
 }
 
 void SI446x::radio_hal_DeassertShutdown(void) {
-	PWRDN = 0;
+	PWRDN = false;
+	shutdown(PWRDN);
 }
 
 void SI446x::radio_hal_ClearNsel(void) {
-	RF_NSEL = 0;
+	RF_NSEL = false;
+	nsel(RF_NSEL);
+}
+void SI446x::shutdown(bool b)
+{
+	HAL_GPIO_WritePin(_shutdown_port, _shutdown_pin, b?GPIO_PIN_SET:GPIO_PIN_RESET);
+}
+void SI446x::nsel(bool b)
+{
+	HAL_GPIO_WritePin(_nsel_port, _nsel_pin, b?GPIO_PIN_SET:GPIO_PIN_RESET);
 }
 
 void SI446x::radio_hal_SetNsel(void) {
-	RF_NSEL = 1;
+	RF_NSEL = true;
+	nsel(RF_NSEL);
 }
 
 bool SI446x::radio_hal_NirqLevel(void) {

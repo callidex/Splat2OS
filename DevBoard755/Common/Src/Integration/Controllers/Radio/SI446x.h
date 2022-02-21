@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdarg.h>
+#include <cmsis_os.h>
 #include "si446x_cmd.h"
 #include "stm32h7xx_hal.h"
 #include "stm32h7xx_hal_spi.h"
@@ -18,10 +19,10 @@
 
 #define SI466X_FIFO_SIZE 64
 #define RADIO_CTS_TIMEOUT
-//#define SEGMENT_VARIABLE(name, vartype, locsegment) vartype locsegment name
 
 class SI446x {
 public:
+	osThreadId_t createThread();
 	enum {
 		SI446X_SUCCESS,
 		SI446X_NO_PATCH,
@@ -33,9 +34,12 @@ public:
 	union si446x_cmd_reply_union Si446xCmd;
 	SI446x();
 	void led(bool on);
-	SI446x(SPI_HandleTypeDef *  hspi);
+    SI446x(SPI_HandleTypeDef *  hspi, GPIO_TypeDef * nsel_port, uint16_t nsel_pin, GPIO_TypeDef * shutdown_port, uint16_t shutdown_pin ,  GPIO_TypeDef * cts_port, uint16_t cts_pin  );
 	virtual ~SI446x();
 	void reset(void);
+	void shutdown(bool b);
+	void nsel(bool b);
+
 	void power_up(uint8_t BOOT_OPTIONS, uint8_t XTAL_OPTIONS,
 			uint32_t XO_FREQ);
 	uint8_t configuration_init(const uint8_t *pSetPropCmd);
@@ -106,7 +110,15 @@ public:
 	void fifo_info_fast_reset(uint8_t FIFO);
 	void fifo_info_fast_read(void);
 
+	osThreadId_t getThreadHandle() { return threadHandle; };
 private:
+	uint16_t _shutdown_pin, _nsel_pin, _cts_pin;
+	GPIO_TypeDef * _shutdown_port, *_nsel_port, *_cts_port;
+	void (*nsel_func)(bool);
+	void (*shutdown_func)(bool);
+
+	osThreadId_t threadHandle;
+	void threadRunner(void const * argument);
 	SPI_HandleTypeDef *  _hspi;
 	uint8_t radio_comm_GetResp(uint8_t byteCount, uint8_t *pData);
 	void radio_comm_SendCmd(uint8_t byteCount, uint8_t *pData);
@@ -119,8 +131,8 @@ private:
 	uint8_t radio_comm_SendCmdGetResp(uint8_t cmdByteCount, uint8_t *pCmdData,
 			uint8_t respByteCount, uint8_t *pRespData);
 	void radio_comm_ClearCTS(void);
-	bool ctsWentHigh = 0;
-	bool ctsVal= 0;
+	bool ctsWentHigh = false;
+	bool ctsVal= false;
 	uint8_t errCnt= 0;
     bool PWRDN;
     bool RF_NSEL;

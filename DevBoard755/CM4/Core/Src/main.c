@@ -20,6 +20,7 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "spi.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -105,9 +106,16 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_USART3_UART_Init();
+ // MX_USART3_UART_Init();
   MX_SPI4_Init();
+  MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
+  /* Init scheduler */
+
+  //need to intercept before the generated call to kernel start.
+  osKernelInitialize();
+  MX_FREERTOS_Init();
+  real_main();  // won't return
 
   /* USER CODE END 2 */
 
@@ -115,7 +123,7 @@ int main(void)
   osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
   MX_FREERTOS_Init();
   /* Start scheduler */
-  real_main();
+  osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
