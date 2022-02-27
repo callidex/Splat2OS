@@ -19,11 +19,14 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "spi.h"
 #include "tim.h"
+#include "usart.h"
+#include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+//#include "realmain.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -41,7 +44,16 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+int _write(int file, char *ptr, int len)
+{
+  int DataIdx;
 
+  for (DataIdx = 0; DataIdx < len; DataIdx++)
+  {
+    ITM_SendChar(*ptr++);
+  }
+  return len;
+}
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -59,6 +71,7 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+static uint8_t u4rxdmabuf[64];	// dma in buffer
 
 /* USER CODE END 0 */
 
@@ -95,8 +108,6 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-//  Integration::LCDController *lcd = new Integration::LCDController(1);
-  //Integration::LCD::Page *p = lcd->AddPage("Title");
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -124,8 +135,78 @@ Error_Handler();
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_SPI4_Init();
+  MX_USART3_UART_Init();
   MX_TIM6_Init();
+  MX_UART4_Init();
+  MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
+
+  /* Init scheduler */
+  osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
+  MX_FREERTOS_Init();
+  char test[1];
+
+
+
+//  HAL_GPIO_WritePin(ZIGBEE_WAKE_GPIO_Port, ZIGBEE_WAKE_Pin, GPIO_PIN_RESET);
+//  osDelay(100);
+//  HAL_GPIO_WritePin(ZIGBEE_RESET_GPIO_Port, ZIGBEE_RESET_Pin, GPIO_PIN_SET);
+//  osDelay(1100);
+//  HAL_GPIO_WritePin(ZIGBEE_RESET_GPIO_Port, ZIGBEE_RESET_Pin, GPIO_PIN_RESET);
+//  osDelay(1100);
+//  HAL_GPIO_WritePin(ZIGBEE_RESET_GPIO_Port, ZIGBEE_RESET_Pin, GPIO_PIN_SET);
+//
+//  osDelay(2000);
+//  HAL_GPIO_WritePin(ZIGBEE_BAUD_RESET_GPIO_Port, ZIGBEE_BAUD_RESET_Pin, GPIO_PIN_SET);
+//  osDelay(1100);
+//  HAL_GPIO_WritePin(ZIGBEE_BAUD_RESET_GPIO_Port, ZIGBEE_BAUD_RESET_Pin, GPIO_PIN_RESET);
+//  osDelay(1100);
+//  HAL_GPIO_WritePin(ZIGBEE_BAUD_RESET_GPIO_Port, ZIGBEE_BAUD_RESET_Pin, GPIO_PIN_SET);
+//
+//  {
+//		HAL_UART_Transmit(&huart4, "2", sizeof("2"), 10);
+//		HAL_UART_Transmit(&huart4, "A", sizeof("O"), 10);
+//		HAL_UART_Transmit(&huart4, " ", sizeof("O"), 10);
+//		HAL_UART_Transmit(&huart4, "2", sizeof("O"), 10);
+//		HAL_UART_Transmit(&huart4, "D", sizeof("O"), 10);
+//		HAL_UART_Transmit(&huart4, " ", sizeof("O"), 10);
+//		HAL_UART_Transmit(&huart4, "2", sizeof("O"), 10);
+//		HAL_UART_Transmit(&huart4, "E", sizeof("O"), 10);
+//
+//  }
+//
+//
+//
+//
+//
+//
+//
+//
+//  HAL_GPIO_WritePin(ZIGBEE_MODE_SWITCH_GPIO_Port, ZIGBEE_MODE_SWITCH_Pin, GPIO_PIN_RESET);
+//  osDelay(600);
+//  HAL_GPIO_WritePin(ZIGBEE_MODE_SWITCH_GPIO_Port, ZIGBEE_MODE_SWITCH_Pin, GPIO_PIN_SET);
+
+	//HAL_GPIO_WritePin(GPIOG, GPIO_PIN_3, GPIO_PIN_SET);		// TOUCH link request high (inactive)
+
+
+
+//  HAL_GPIO_WritePin(ZIGBEE_WAKE_GPIO_Port, ZIGBEE_WAKE_Pin, GPIO_PIN_RESET);		// Wake low -> wakeup
+//	osDelay(100);
+//	HAL_GPIO_WritePin(ZIGBEE_RESET_GPIO_Port, ZIGBEE_RESET_Pin, GPIO_PIN_SET);		// RESET high -> Running
+//	osDelay(10);
+//	HAL_GPIO_WritePin(ZIGBEE_BAUD_RESET_GPIO_Port, ZIGBEE_BAUD_RESET_Pin, GPIO_PIN_RESET);/// BAUD active  (pull down for > 1 sec to reset baud to 115200)
+//	osDelay(1200);
+//	HAL_GPIO_WritePin(ZIGBEE_BAUD_RESET_GPIO_Port, ZIGBEE_BAUD_RESET_Pin, GPIO_PIN_SET);	// BAUD inactive  (pull down for > 1 sec to reset baud to 115200)
+//	osDelay(10);
+
+	real_main();
+
+
+  osKernelStart();
+
+
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -194,7 +275,11 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+    if (huart->Instance == UART4){
 
+    }
+}
 /* USER CODE END 4 */
 
 /**

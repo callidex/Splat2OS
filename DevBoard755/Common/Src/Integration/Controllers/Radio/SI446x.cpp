@@ -5,7 +5,7 @@
  *      Author: paul
  */
 
-#include "SI446x.h"
+#include "SI446x.hpp"
 
 osThreadId_t SI446x::createThread(){
 
@@ -37,21 +37,10 @@ void SI446x::threadRunner(void const * argument)
 
 }
 
+//SI446x::SI446x(SPI_HandleTypeDef *hspi, PortMap *portmap, Logger* logger ):_hspi(hspi), _portmap(portmap),_logger(logger){
+//	logger->WriteLog("Created");
+//}
 
-SI446x::SI446x(SPI_HandleTypeDef *  hspi, GPIO_TypeDef * nsel_port, uint16_t nsel_pin, GPIO_TypeDef * shutdown_port, uint16_t shutdown_pin ,  GPIO_TypeDef * cts_port, uint16_t cts_pin  )
-{
-	this->_hspi = hspi;
-	this->createThread();
-//    this->nsel_func = fnsel;
-//    this->shutdown_func = shutdown;
-	this->_shutdown_pin = shutdown_pin;
-	this->_shutdown_port = shutdown_port;
-	this->_nsel_pin = nsel_pin;
-	this->_nsel_port = nsel_port;
-	this->_cts_pin = cts_pin;
-	this->_cts_port = cts_port;
-
-}
 
 void SI446x::led(bool on)
 {
@@ -475,13 +464,13 @@ void SI446x::get_chip_status(uint8_t CHIP_CLR_PEND) {
 //	Si446xCmd.IRCAL_MANUAL.IRCAL_PH_REPLY = Pro2Cmd[1];
 //}
 
-inline void SI446x::protocol_cfg(uint8_t PROTOCOL) {
+void SI446x::protocol_cfg(uint8_t PROTOCOL) {
 }
 
-inline void SI446x::request_device_state(void) {
+void SI446x::request_device_state(void) {
 }
 
-inline void SI446x::tx_hop(uint8_t INTE, uint8_t FRAC2, uint8_t FRAC1,
+void SI446x::tx_hop(uint8_t INTE, uint8_t FRAC2, uint8_t FRAC1,
 		uint8_t FRAC0, uint8_t VCO_CNT1, uint8_t VCO_CNT0,
 		uint8_t PLL_SETTLE_TIME1, uint8_t PLL_SETTLE_TIME0) {
 	Pro2Cmd[0] = SI446X_CMD_ID_TX_HOP;
@@ -497,7 +486,7 @@ inline void SI446x::tx_hop(uint8_t INTE, uint8_t FRAC2, uint8_t FRAC1,
 	radio_comm_SendCmd( SI446X_CMD_ARG_COUNT_TX_HOP, Pro2Cmd);
 }
 
-inline void SI446x::rx_hop(uint8_t INTE, uint8_t FRAC2, uint8_t FRAC1,
+void SI446x::rx_hop(uint8_t INTE, uint8_t FRAC2, uint8_t FRAC1,
 		uint8_t FRAC0, uint8_t VCO_CNT1, uint8_t VCO_CNT0) {
 	Pro2Cmd[0] = SI446X_CMD_ID_RX_HOP;
 	Pro2Cmd[1] = INTE;

@@ -19,14 +19,12 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
-#include "spi.h"
 #include "tim.h"
-#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "realmain.h"
+//#include "realmain.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -106,11 +104,11 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
- // MX_USART3_UART_Init();
-  MX_SPI4_Init();
   MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
   /* Init scheduler */
+
+ // SenddString("TEST");
 
   //need to intercept before the generated call to kernel start.
   osKernelInitialize();

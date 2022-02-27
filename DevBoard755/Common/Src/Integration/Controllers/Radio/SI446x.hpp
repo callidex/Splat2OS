@@ -7,6 +7,7 @@
 
 #ifndef SRC_INTEGRATION_SI446X_H_
 #define SRC_INTEGRATION_SI446X_H_
+
 #ifdef __cplusplus
 #include <stdlib.h>
 #include <stdint.h>
@@ -34,7 +35,7 @@ public:
 	union si446x_cmd_reply_union Si446xCmd;
 	SI446x();
 	void led(bool on);
-    SI446x(SPI_HandleTypeDef *  hspi, GPIO_TypeDef * nsel_port, uint16_t nsel_pin, GPIO_TypeDef * shutdown_port, uint16_t shutdown_pin ,  GPIO_TypeDef * cts_port, uint16_t cts_pin  );
+//    SI446x(SPI_HandleTypeDef *  hspi, PortMap *portmap, Logger* logger );
 	virtual ~SI446x();
 	void reset(void);
 	void shutdown(bool b);
@@ -112,6 +113,8 @@ public:
 
 	osThreadId_t getThreadHandle() { return threadHandle; };
 private:
+//	PortMap * _portmap;
+//	Logger * _logger;
 	uint16_t _shutdown_pin, _nsel_pin, _cts_pin;
 	GPIO_TypeDef * _shutdown_port, *_nsel_port, *_cts_port;
 	void (*nsel_func)(bool);

@@ -1,3 +1,4 @@
+
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
@@ -17,7 +18,20 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include "realmain.h"
+#include "../Integration/Controllers/Zigbee/Zigbee.h"
+
+/* Here is where the action happens, include the peripheral you want to play with
+ * Create an instance, go nuts
+ */
+
+extern UART_HandleTypeDef huart3;
+extern UART_HandleTypeDef huart4;
 
 void shutdown(bool b)
 {
@@ -31,13 +45,26 @@ void nsel(bool b)
 
 void real_main(void)
 {
-	SI446x * tx = new SI446x(&hspi4, Si4463_CS_GPIO_Port, Si4463_CS_Pin , Si4463_Shutdown_GPIO_Port, Si4463_Shutdown_Pin, Si446x_CTS_GPIO_Port, Si446x_CTS_Pin);
+	//example : Swapping out logging methods with no change to the peripheral
+	//Integration::SerialLogger *s1 = new Integration::SerialLogger(&huart3, "ZigBee");
+	Integration::SWVLogger *s1 = new Integration::SWVLogger("ZigBee");
 
-	tx->reset();
-	tx->nsel(false);
-	GPIO_PinState pin  = HAL_GPIO_ReadPin(Si446x_CTS_GPIO_Port, Si446x_CTS_Pin);
+	Integration::Zigbee *zig1 = new Integration::Zigbee(s1, &huart4);
 
+//	GPIO_PinState pin  = HAL_GPIO_ReadPin(Si446x_CTS_GPIO_Port, Si446x_CTS_Pin);
+//
+//	PortMap * map = new PortMap();
+//
+//	map->Pins.push_back(new PinOut(Si4463_CS_GPIO_Port, Si4463_CS_Pin, "CS"));
+//	map->Pins.push_back(new PinOut(Si446x_CTS_GPIO_Port, Si446x_CTS_Pin, "CTS"));
+//	map->Pins.push_back(new PinOut(Si4463_Shutdown_GPIO_Port, Si4463_Shutdown_Pin, "Shutdown"));
+////
+//	SerialLogger * logger= new SerialLogger(&huart3);
+//	SI446x * tx = new SI446x(&hspi4, map, logger);
 
+//	pin  = HAL_GPIO_ReadPin(Si446x_CTS_GPIO_Port, Si446x_CTS_Pin);
+//	//tx->reset();
+//	pin  = HAL_GPIO_ReadPin(Si446x_CTS_GPIO_Port, Si446x_CTS_Pin);
 	return;
 
   // hand over control to the dark side
@@ -58,4 +85,6 @@ void real_main(void)
 
 
 
-
+#ifdef __cplusplus
+}
+#endif

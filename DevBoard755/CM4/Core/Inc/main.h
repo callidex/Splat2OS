@@ -57,24 +57,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define Si4463_SCK_Pin GPIO_PIN_2
-#define Si4463_SCK_GPIO_Port GPIOE
-#define Si4463_MISO_Pin GPIO_PIN_5
-#define Si4463_MISO_GPIO_Port GPIOE
-#define Si4463_MOSI_Pin GPIO_PIN_6
-#define Si4463_MOSI_GPIO_Port GPIOE
 #define Si446x_CTS_Pin GPIO_PIN_8
 #define Si446x_CTS_GPIO_Port GPIOF
-#define Si4463_Int_Pin GPIO_PIN_1
-#define Si4463_Int_GPIO_Port GPIOB
-#define DebugUART_TX_Pin GPIO_PIN_8
-#define DebugUART_TX_GPIO_Port GPIOD
-#define DebugUART_RX_Pin GPIO_PIN_9
-#define DebugUART_RX_GPIO_Port GPIOD
-#define Si4463_CS_Pin GPIO_PIN_14
-#define Si4463_CS_GPIO_Port GPIOG
-#define Si4463_Shutdown_Pin GPIO_PIN_5
-#define Si4463_Shutdown_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
