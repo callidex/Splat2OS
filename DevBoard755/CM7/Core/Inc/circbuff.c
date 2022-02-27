@@ -33,7 +33,7 @@ static void advance_head_pointer(cbuf_handle_t cbuf)
 }
 
 // Must use this to start the buffer
-cbuf_handle_t circular_buf_init(uint8_t* buffer, size_t size)
+cbuf_handle_t circular_buf_init(uint8_t* buffer, uint8_t size)
 {
 	assert(buffer && size);
 	cbuf_handle_t cbuf = malloc(sizeof(circular_buf_t));

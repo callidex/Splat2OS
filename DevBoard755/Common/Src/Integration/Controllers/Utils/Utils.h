@@ -148,9 +148,9 @@ public:
 	{
 		logger =log;
 		device = dev;
-		logger->WriteLog("Initialising UART Circular Buffer");
 		buffer  = (uint8_t*) malloc(64 * sizeof(uint8_t));
-		circular_buffer = circular_buf_init(buffer, 64 * sizeof(uint8_t));
+		circular_buffer = circular_buf_init(buffer, 64);
+		logger->WriteLog("Initialised UART Circular Buffer");
 	}
 
 private:

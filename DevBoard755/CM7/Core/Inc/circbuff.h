@@ -8,7 +8,7 @@ typedef struct circular_buf_t circular_buf_t;
 
 typedef circular_buf_t* cbuf_handle_t;
 
-cbuf_handle_t circular_buf_init(uint8_t* buffer, size_t size);
+cbuf_handle_t circular_buf_init(uint8_t* buffer, uint8_t size);
 
 void circular_buf_free(cbuf_handle_t cbuf);
 
