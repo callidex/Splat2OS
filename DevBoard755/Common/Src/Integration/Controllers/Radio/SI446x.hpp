@@ -7,21 +7,24 @@
 
 #ifndef SRC_INTEGRATION_SI446X_H_
 #define SRC_INTEGRATION_SI446X_H_
-
-#ifdef __cplusplus
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdarg.h>
-#include <cmsis_os.h>
+#include "..\Utils\Utils.h"
+//#ifdef __cplusplus
+//#include <stdlib.h>
+//#include <stdint.h>
+//#include <stdarg.h>
+//#include <cmsis_os.h>
 #include "si446x_cmd.h"
-#include "stm32h7xx_hal.h"
-#include "stm32h7xx_hal_spi.h"
+//#include "stm32h7xx_hal.h"
+//#include "stm32h7xx_hal_spi.h"
 
 
 #define SI466X_FIFO_SIZE 64
 #define RADIO_CTS_TIMEOUT
 
-class SI446x {
+namespace Integration {
+
+
+class SI446x : public SPIBoardDevice  {
 public:
 	osThreadId_t createThread();
 	enum {
@@ -33,9 +36,13 @@ public:
 	};
 	uint8_t Pro2Cmd[7];
 	union si446x_cmd_reply_union Si446xCmd;
-	SI446x();
 	void led(bool on);
-//    SI446x(SPI_HandleTypeDef *  hspi, PortMap *portmap, Logger* logger );
+	SI446x(Logger* logger ,SPI_HandleTypeDef *hspi ):SPIBoardDevice(logger,hspi)
+	{
+		logger->WriteLog("SPI","SPI Initalising");
+	}
+
+
 	virtual ~SI446x();
 	void reset(void);
 	void shutdown(bool b);
@@ -113,6 +120,15 @@ public:
 
 	osThreadId_t getThreadHandle() { return threadHandle; };
 private:
+
+ char *logName = "spi";
+ void WriteLog(char*s)
+		 {
+	 logger->WriteLog(logName,s);
+		 }
+
+
+
 //	PortMap * _portmap;
 //	Logger * _logger;
 	uint16_t _shutdown_pin, _nsel_pin, _cts_pin;
@@ -157,9 +173,7 @@ private:
 	void radio_hal_SpiReadData(uint8_t byteCount, uint8_t* pData);
 
 };
- #endif
-
-
+}
 
 
 #endif /* SRC_INTEGRATION_SI446X_H_ */

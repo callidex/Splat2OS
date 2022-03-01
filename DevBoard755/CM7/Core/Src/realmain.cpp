@@ -25,6 +25,7 @@ extern "C"
 
 #include "realmain.h"
 #include "../Integration/Controllers/Zigbee/Zigbee.h"
+#include "../Integration/Controllers/Radio/SI446x.hpp"
 
 /* Here is where the action happens, include the peripheral you want to play with
  * Create an instance, go nuts
@@ -32,6 +33,7 @@ extern "C"
 
 extern UART_HandleTypeDef huart3;
 extern UART_HandleTypeDef huart4;
+extern SPI_HandleTypeDef hspi4;
 
 void shutdown(bool b)
 {
@@ -42,12 +44,16 @@ void nsel(bool b)
 	HAL_GPIO_WritePin(Si4463_CS_GPIO_Port, Si4463_CS_Pin, b?GPIO_PIN_SET:GPIO_PIN_RESET);
 }
 
-
+#define UART_LOGGING
 void real_main(void)
 {
+
 	//example : Swapping out logging methods with no change to the peripheral
-	//Integration::SerialLogger *s1 = new Integration::SerialLogger(&huart3, "ZigBee");
-	Integration::SWVLogger *s1 = new Integration::SWVLogger("ZigBee");
+#ifdef UART_LOGGING
+	Integration::SerialLogger *s1 = new Integration::SerialLogger(&huart3);
+#else
+	Integration::SWVLogger *s1 = new Integration::SWVLogger();
+#endif
 
 	Integration::Zigbee *zig1 = new Integration::Zigbee(s1, &huart4);
 
@@ -60,7 +66,7 @@ void real_main(void)
 //	map->Pins.push_back(new PinOut(Si4463_Shutdown_GPIO_Port, Si4463_Shutdown_Pin, "Shutdown"));
 ////
 //	SerialLogger * logger= new SerialLogger(&huart3);
-//	SI446x * tx = new SI446x(&hspi4, map, logger);
+	Integration::SI446x * tx = new Integration::SI446x(s1, &hspi4); // ,, nsel_port, nsel_pin, shutdown_port, shutdown_pin);
 
 //	pin  = HAL_GPIO_ReadPin(Si446x_CTS_GPIO_Port, Si446x_CTS_Pin);
 //	//tx->reset();

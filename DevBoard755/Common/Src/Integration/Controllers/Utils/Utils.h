@@ -46,6 +46,7 @@
 #include "stm32h7xx_hal.h"
 #include "stm32h7xx_hal_gpio.h"
 #include "stm32h7xx_hal_uart.h"
+#include "stm32h7xx_hal_spi.h"
 #include "stm32h7xx_hal_spi_ex.h"
 #include "cmsis_os2.h"
 #include <stdio.h>
@@ -59,7 +60,23 @@ namespace Integration
 class Logger
 {
 public:
-	virtual void WriteLog(char * logstring) =0;
+	bool includeTimeStamp;
+	void WriteLog(char * logname,char *logstring)
+	{
+		if(includeTimeStamp)
+		{
+			char buff[100];
+			sprintf(buff, "%lu --", HAL_GetTick());
+			WriteLine(buff);
+		}
+		if(logname) {
+			WriteLine(logname);
+			WriteLine(" -- ");
+		}
+		WriteLine(logstring);
+		WriteLine("\r\n");
+	}
+	virtual void WriteLine(char * s) = 0;
 };
 
 
@@ -68,7 +85,7 @@ class SerialLogger : public Logger
 {
 public:
 
-	void WriteLog(char *logstring)
+	void WriteLog(char*logName, char *logstring)
 	{
 
 		if(includeTimeStamp)
@@ -81,9 +98,9 @@ public:
 		WriteLine(logstring);
 		WriteLine("\r\n");
 	}
-	SerialLogger(UART_HandleTypeDef * serialPort,char*name): _serialPort(serialPort), logName(name){};
+	SerialLogger(UART_HandleTypeDef * serialPort): _serialPort(serialPort) {};
 private:
-	char *logName;
+
 	bool includeTimeStamp = true;
 	UART_HandleTypeDef * _serialPort;
 	void Send(uint8_t c)
@@ -109,30 +126,16 @@ class SWVLogger : public Logger
 {
 public:
 
-	void WriteLog(char *logstring)
-	{
-
-		if(includeTimeStamp)
-		{
-			char buff[100];
-			sprintf(buff, "%lu --", HAL_GetTick());
-			WriteLine(buff);
-		}
-		if(logName) {
-			WriteLine(logName);
-			WriteLine(" -- ");
-		}
-		WriteLine(logstring);
-		WriteLine("\r\n");
-	}
-	SWVLogger(char*name):   logName(name){};
+	SWVLogger(){};
 private:
-	char *logName;
-	bool includeTimeStamp = true;
-
-	void WriteLine(char * s)
+	void WriteLine(char *name, char * s)
 	{
-		printf(s);
+
+		printf("%s - %s",name,s);
+	}
+	void WriteLine(char *s)
+	{
+		printf("%s");
 	}
 };
 
@@ -144,13 +147,37 @@ public:
 	UART_HandleTypeDef * device;
 	circular_buf_t*  circular_buffer;
 
-	UARTBoardDevice(Logger * log, UART_HandleTypeDef * dev)
+	UARTBoardDevice(Logger * log, UART_HandleTypeDef * dev, char* name)
 	{
 		logger =log;
 		device = dev;
 		buffer  = (uint8_t*) malloc(64 * sizeof(uint8_t));
 		circular_buffer = circular_buf_init(buffer, 64);
-		logger->WriteLog("Initialised UART Circular Buffer");
+		logger->WriteLog(name, "Initialised UART Circular Buffer");
+	}
+
+private:
+	uint8_t *buffer;
+
+public:
+    //virtual void irqhandler(int) = 0;
+};
+
+
+class SPIBoardDevice
+{
+public:
+	Logger*  logger;
+	SPI_HandleTypeDef * device;
+	circular_buf_t*  circular_buffer;
+
+	SPIBoardDevice(Logger * log, SPI_HandleTypeDef * dev)
+	{
+		logger =log;
+		device = dev;
+//		buffer  = (uint8_t*) malloc(64 * sizeof(uint8_t));
+//		circular_buffer = circular_buf_init(buffer, 64);
+//		logger->WriteLog("SPIBOARD", "Initialised UART Circular Buffer");
 	}
 
 private:

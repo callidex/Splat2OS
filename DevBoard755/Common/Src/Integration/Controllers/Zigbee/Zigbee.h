@@ -13,9 +13,9 @@ namespace Integration {
 class Zigbee : public UARTBoardDevice {
 public:
 	virtual ~Zigbee();
-	Zigbee(Logger * log,  UART_HandleTypeDef * dev) :UARTBoardDevice(log, dev)
+	Zigbee(Logger * log,  UART_HandleTypeDef * dev) :UARTBoardDevice(log, dev, "Zigbee")
 	{
-		log->WriteLog("Starting Up");
+		log->WriteLog(logName, "Starting Up");
 		HAL_GPIO_WritePin(ZIGBEE_WAKE_GPIO_Port, ZIGBEE_WAKE_Pin, GPIO_PIN_RESET);
 		osDelay(100);
 		HAL_GPIO_WritePin(ZIGBEE_RESET_GPIO_Port, ZIGBEE_RESET_Pin, GPIO_PIN_SET);
@@ -24,12 +24,19 @@ public:
 		osDelay(1200);
 		HAL_GPIO_WritePin(ZIGBEE_BAUD_RESET_GPIO_Port, ZIGBEE_BAUD_RESET_Pin, GPIO_PIN_SET);
 
-		log->WriteLog((char*)"Started");
+		log->WriteLog(logName, "Started");
 
 	}
 
-};
+private:
+ char *logName = "Zigbee";
+ void WriteLog(char*s)
+ {
+	 logger->WriteLog(logName,s);
+ }
 
+
+};
 } /* namespace Integration */
 
 #endif /* SRC_INTEGRATION_CONTROLLERS_ZIGBEE_ZIGBEE_H_ */
